@@ -10,10 +10,13 @@ import store from "./store";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
+
+const clientId = process.env.REACT_APP_CLIENT_ID as string;
+
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <GoogleOAuthProvider clientId="881948276832-1lli14b5qmsgq9bcci4npat3pn7s8234.apps.googleusercontent.com">
+      <GoogleOAuthProvider clientId={clientId}>
         <App />
       </GoogleOAuthProvider>
     </Provider>

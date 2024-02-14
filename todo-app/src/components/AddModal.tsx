@@ -1,7 +1,8 @@
 import React, { useState, useRef, useCallback } from "react";
 import { Button, Modal, TextInput } from "flowbite-react";
 import { useDispatch } from "react-redux";
-import { setTask } from "../reducers/taskSlice";
+import { toast } from "react-toastify";
+import { addTask as addToLocalStorage } from "../reducers/taskSlice";
 
 function AddModal() {
   const [openModal, setOpenModal] = useState(false);
@@ -14,8 +15,10 @@ function AddModal() {
         let inputTask = taskInputRef.current?.value;
         inputTask = inputTask.trim();
         if (inputTask.length > 0) {
-          dispatch(setTask([{ task: inputTask, status: false }]));
+          dispatch(addToLocalStorage({ task: inputTask, status: false }));
+          toast.success("Task Added Successfully...");
         } else {
+          toast.error("Please Enter the task...");
         }
         taskInputRef.current.value = ``;
         setOpenModal(false);
@@ -50,6 +53,8 @@ function AddModal() {
                 id="task"
                 ref={taskInputRef}
                 placeholder="Enter Your Task"
+                onKeyDown={(e) => handleKeyDown(e)}
+                autoComplete="off"
                 required
               />
             </div>
