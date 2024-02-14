@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-type TaskObject = {
+interface TaskObject  {
   task: string;
   status: boolean;
 };
-type Tasklist = {
+interface Tasklist {
   taskList: TaskObject[];
 };
 

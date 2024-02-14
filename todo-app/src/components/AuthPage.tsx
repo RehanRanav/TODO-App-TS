@@ -5,14 +5,14 @@ import { useDispatch } from "react-redux";
 import { setUser } from "../reducers/userSlice";
 
 const AuthPage: FC = () => {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   return (
     <div className="flex justify-center items-center h-full">
       <GoogleLogin
         onSuccess={(credentialResponse: any) => {
           const decoded = jwtDecode(credentialResponse?.credential);
-          dispatch(setUser(decoded))
+          dispatch(setUser(decoded));
         }}
         onError={() => {
           console.log("Login Failed");
