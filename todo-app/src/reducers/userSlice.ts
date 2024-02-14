@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface UserState {
   userData: Record<string, any> | null; // Adjust the data type as per your requirement
@@ -9,14 +9,16 @@ const initialState: UserState = {
 };
 
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
     setUser: (state, action: PayloadAction<Record<string, any>>) => {
       state.userData = action.payload;
+      localStorage.setItem("user", JSON.stringify(state.userData));
     },
     clearUser: (state) => {
       state.userData = null;
+      localStorage.removeItem("user");
     },
   },
 });
