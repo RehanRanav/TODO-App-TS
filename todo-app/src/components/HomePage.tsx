@@ -1,28 +1,23 @@
-import React, { useEffect } from "react";
+import React, { FC, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectTask, setTask } from "../reducers/taskSlice";
 import { clearUser, selectUser } from "../reducers/userSlice";
+import { TaskObject } from "../interface";
 import AddModal from "./AddModal";
+import TaskCard from "./TaskCard";
 import { Button } from "flowbite-react";
+import Notask from "../images/Notasks.jpg";
 
-const HomePage = () => {
+const HomePage: FC = () => {
   const tasks = useSelector(selectTask);
   const { name, picture } = useSelector(selectUser) || {};
   const dispatch = useDispatch();
 
-  type TaskObject = {
-    task: string;
-    status: boolean;
-  };
-  type Tasklist = {
-    storedTasks: TaskObject[];
-  };
-
   useEffect(() => {
-    let storedTasksList = localStorage.getItem("tasklist");
-    if (storedTasksList) {
-      const storedTasks: Tasklist = JSON.parse(storedTasksList);
-      dispatch(setTask(storedTasks.storedTasks));
+    let taskList = localStorage.getItem("tasklist");
+    if (taskList) {
+      const taskLists: TaskObject[] = JSON.parse(taskList);
+      dispatch(setTask(taskLists));
     }
   }, []);
 
@@ -49,8 +44,29 @@ const HomePage = () => {
           <Button onClick={googleLogout}>Logout</Button>
         </div>
       </div>
+
       <div className="flex justify-center mt-14">
         <AddModal />
+      </div>
+      <div className="flex flex-col gap-5 justify-center items-center w-1/2 m-auto p-5 max-sm:w-full">
+        {tasks.length > 0 ? (
+          tasks.map((task, index) => {
+            return (
+              <TaskCard
+                key={index}
+                index={index}
+                task={task.task}
+                status={task.status}
+              />
+            );
+          })
+        ) : (
+          <img
+            src={Notask}
+            alt="No Task Found"
+            className="m-auto p-auto w-1/2"
+          />
+        )}
       </div>
     </div>
   );

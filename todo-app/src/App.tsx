@@ -1,8 +1,10 @@
 import React, { FC, useEffect } from "react";
-import AuthPage from "./components/AuthPage";
+import { Slide, ToastContainer } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
+import AuthPage from "./components/AuthPage";
 import { selectUser, setUser } from "./reducers/userSlice";
 import HomePage from "./components/HomePage";
+import "react-toastify/dist/ReactToastify.css";
 
 const App: FC = () => {
   const user = useSelector(selectUser);
@@ -20,13 +22,26 @@ const App: FC = () => {
     let logedUser: string | null | Tasklist = localStorage.getItem("user");
     if (logedUser) {
       logedUser = JSON.parse(logedUser) as Tasklist;
-      console.log(logedUser);
       dispatch(setUser(logedUser));
     }
-  },[]);
+  }, []);
 
   return (
     <div className="App w-full h-screen">
+      <ToastContainer
+        position="top-left"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Slide}
+      />
+
       {user ? <HomePage /> : <AuthPage />}
     </div>
   );
