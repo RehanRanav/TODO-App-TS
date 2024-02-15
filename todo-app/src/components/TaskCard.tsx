@@ -131,7 +131,9 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
         className={`h-fit flex-1 border-none text-gray-900 text-sm rounded block w-fit p-2.5${
           completeTask ? "line-through opacity-50" : ""
         }`}
-        style={{ textDecoration: `${completeTask ? "line-through" : "none"}` }}
+        style={{
+          textDecoration: `${completeTask ? "line-through" : "none"}`,
+        }}
         value={taskInput}
         onChange={editTaskInput}
         onKeyDown={(e) => handleKeyDown(e)}

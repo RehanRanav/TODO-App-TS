@@ -27,6 +27,7 @@ function AddModal() {
       toast.error("Something went wrong");
       setOpenModal(false);
     }
+
   }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
