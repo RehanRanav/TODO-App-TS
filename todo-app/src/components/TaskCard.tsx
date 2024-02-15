@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Modal, Button } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+import { TaskCardProps } from "../interface";
+import { selectTask, setTask } from "../reducers/taskSlice";
 import Deletebtn from "../images/trash.svg";
 import Editbtn from "../images/edit.svg";
 import Cancelbtn from "../images/cancel.svg";
-import { TaskCardProps } from "../interface";
-import { useSelector, useDispatch } from "react-redux";
-import { selectTask, setTask } from "../reducers/taskSlice";
 
 const TaskCard = ({ task, index, status }: TaskCardProps) => {
   const tasks = useSelector(selectTask);
@@ -81,7 +81,11 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
         setTaskInput(task);
       }
       setDisableTask(true);
-    } catch (e) {}
+    } catch (e) {
+      toast.error("Something went wrong");
+      setTaskInput(task);
+      setDisableTask(true);
+    }
   };
 
   const deleteTask = (index: number) => {
@@ -101,7 +105,7 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
     updatedTasks[index] = { ...updatedTasks[index] };
 
     updatedTasks[index].status = !completeTask;
-    
+
     dispatch(setTask(updatedTasks));
     if (!completeTask) {
       toast.info("👏 Good Job! Task Completed...");

@@ -1,12 +1,11 @@
-import React, { FC, useEffect } from "react";
+import { FC, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectTask, setTask } from "../reducers/taskSlice";
 import { TaskObject } from "../interface";
 import AddModal from "./AddModal";
 import TaskCard from "./TaskCard";
-
-import Notask from "../images/Notasks.jpg";
 import Header from "./Header";
+import Notask from "../images/Notasks.jpg";
 
 const HomePage: FC = () => {
   const tasks = useSelector(selectTask);

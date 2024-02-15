@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import { FC } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useDispatch } from "react-redux";

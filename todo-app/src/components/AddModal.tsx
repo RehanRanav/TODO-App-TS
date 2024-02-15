@@ -23,7 +23,10 @@ function AddModal() {
         taskInputRef.current.value = ``;
         setOpenModal(false);
       }
-    } catch (e) {}
+    } catch (e) {
+      toast.error("Something went wrong");
+      setOpenModal(false);
+    }
   }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
