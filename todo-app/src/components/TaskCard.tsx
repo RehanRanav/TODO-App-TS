@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect, memo } from "react";
-import { Modal, Button } from "flowbite-react";
+import { Modal, Button, Tooltip } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { TaskCardProps } from "../interface";
 import { selectTask, setTask, removeTask } from "../reducers/taskSlice";
 
@@ -14,13 +16,16 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
   const [taskInput, setTaskInput] = useState(task);
   const taskInputRef = useRef<HTMLTextAreaElement | null>(null);
   const checkRef = useRef<HTMLInputElement | null>(null);
-  const cardRef = useRef<HTMLInputElement | null>(null);
+  const cardRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
+  const id = index;
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
 
   useEffect(() => {
     setTaskInput(task);
-    setCompleteTask(status)
-  }, [task]);
+    setCompleteTask(status);
+  }, [task, status]);
 
   useEffect(() => {
     if (taskInputRef.current) {
@@ -41,6 +46,7 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
+        setTaskInput(task);
         setDisableTask(true);
       }
     };
@@ -123,17 +129,31 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
     }
   };
 
+  const dndStyle = {
+    transition,
+    transform: CSS.Transform.toString(transform),
+  };
+
   return (
     <div
-      ref={cardRef}
-      className="bg-orange-100  mx-auto flex justify-between items-center gap-3 border h-fit w-full sm:min-w-fit  p-3 rounded-lg shadow-md font-mono hover:shadow-lg transition duration-300 transform hover:scale-105"
+      ref={(el) => {
+        setNodeRef(el);
+        cardRef.current = el;
+      }}
+      {...attributes}
+      {...listeners}
+      style={dndStyle}
+      className="bg-orange-100  mx-auto flex justify-between items-center gap-3 border h-fit w-full sm:min-w-fit  p-3 rounded-lg shadow-md font-mono hover:shadow-lg transition duration-300 transform hover:scale-105 touch-none"
     >
-      <input
-        type="checkbox"
-        className="p-1 min-w-5 min-h-5 rounded text-blue-500"
-        onChange={handleStatus}
-        ref={checkRef}
-      />
+      <div>{index + 1}.</div>
+      <Tooltip content="Check to mark as complete" placement="left">
+        <input
+          type="checkbox"
+          className="p-1 min-w-5 min-h-5 rounded text-blue-500"
+          onChange={handleStatus}
+          ref={checkRef}
+        />
+      </Tooltip>
 
       <textarea
         ref={taskInputRef}
