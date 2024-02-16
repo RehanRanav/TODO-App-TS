@@ -27,7 +27,7 @@ const App: FC = () => {
   }, []);
 
   return (
-    <div className="App w-full h-screen">
+    <div className="App w-screen min-h-screen bg-amber-100">
       <ToastContainer
         position="top-left"
         autoClose={3000}

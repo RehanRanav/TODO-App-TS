@@ -1,13 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, memo } from "react";
 import { Modal, Button } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { TaskCardProps } from "../interface";
-import { selectTask, setTask } from "../reducers/taskSlice";
-import Deletebtn from "../images/trash.svg";
-import Editbtn from "../images/edit.svg";
-import Cancelbtn from "../images/cancel.svg";
+import { selectTask, setTask, removeTask } from "../reducers/taskSlice";
 
 const TaskCard = ({ task, index, status }: TaskCardProps) => {
   const tasks = useSelector(selectTask);
@@ -15,10 +12,15 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
   const [completeTask, setCompleteTask] = useState(status);
   const [disableTask, setDisableTask] = useState(true);
   const [taskInput, setTaskInput] = useState(task);
-  const taskInputRef = useRef<HTMLInputElement | null>(null);
+  const taskInputRef = useRef<HTMLTextAreaElement | null>(null);
   const checkRef = useRef<HTMLInputElement | null>(null);
   const cardRef = useRef<HTMLInputElement | null>(null);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    setTaskInput(task);
+    setCompleteTask(status)
+  }, [task]);
 
   useEffect(() => {
     if (taskInputRef.current) {
@@ -27,12 +29,14 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
   }, [disableTask]);
 
   useEffect(() => {
-    if (status === true) {
-      if (checkRef.current) {
+    if (checkRef.current) {
+      if (status === true) {
         checkRef.current.checked = true;
+      } else {
+        checkRef.current.checked = false;
       }
     }
-  }, []);
+  }, [task]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -53,7 +57,7 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
     setDisableTask(false);
   };
 
-  const editTaskInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const editTaskInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTaskInput(event.target.value);
   };
 
@@ -75,6 +79,9 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
 
           dispatch(setTask(updatedTasks));
           toast.success("Task Edited Successfully...");
+        } else {
+          toast.error("Please Enter the task...");
+          setTaskInput(task);
         }
       } else {
         toast.error("Please Enter the task...");
@@ -89,12 +96,7 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
   };
 
   const deleteTask = (index: number) => {
-    let updatedTasks = [...tasks];
-    updatedTasks[index] = { ...updatedTasks[index] };
-
-    updatedTasks.splice(index, 1);
-
-    dispatch(setTask(updatedTasks));
+    dispatch(removeTask(index));
 
     setOpenModal(false);
     toast.warning("Task Deleted Successfully...");
@@ -110,10 +112,12 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
     if (!completeTask) {
       toast.info("👏 Good Job! Task Completed...");
     }
+    setTaskInput(task);
     setCompleteTask(!completeTask);
+    setDisableTask(true);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
       addEditedTask();
     }
@@ -122,100 +126,78 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
   return (
     <div
       ref={cardRef}
-      className="flex justify-between gap-2 border h-fit w-full min-w-fit p-3 rounded shadow-md font-mono"
+      className="bg-orange-100  mx-auto flex justify-between items-center gap-3 border h-fit w-full sm:min-w-fit  p-3 rounded-lg shadow-md font-mono hover:shadow-lg transition duration-300 transform hover:scale-105"
     >
       <input
+        type="checkbox"
+        className="p-1 min-w-5 min-h-5 rounded text-blue-500"
+        onChange={handleStatus}
+        ref={checkRef}
+      />
+
+      <textarea
         ref={taskInputRef}
-        type="text"
         id="todotask"
-        className={`h-fit flex-1 border-none text-gray-900 text-sm rounded block w-fit p-2.5${
+        className={`h-fit bg-inherit text-lg resize-none flex-1 border-none text-gray-900 font-bold rounded block w-fit p-2.5${
           completeTask ? "line-through opacity-50" : ""
         }`}
         style={{
           textDecoration: `${completeTask ? "line-through" : "none"}`,
         }}
         value={taskInput}
+        rows={1}
         onChange={editTaskInput}
         onKeyDown={(e) => handleKeyDown(e)}
         autoComplete="off"
         disabled={disableTask}
         required
-      />
-      <div className="flex justify-end items-center flex-wrap gap-3">
-        {disableTask ? (
-          <>
-            <button
-              className="w-fit h-fit text-center border rounded z-10 bg-white hover:bg-slate-100"
-              title="Delete Task"
-              onClick={() => setOpenModal(true)}
-            >
-              <img
-                src={Deletebtn}
-                alt="Enter"
-                className="p-1 min-w-10 min-h-10"
-              />
-            </button>
-            <Modal
-              show={openModal}
-              size="md"
-              onClose={() => setOpenModal(false)}
-              popup
-            >
-              <Modal.Header />
-              <Modal.Body>
-                <div className="text-center">
-                  <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
-                  <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-                    Are you sure you want to delete this Task?
-                  </h3>
-                  <div className="flex justify-center gap-4">
-                    <Button color="failure" onClick={() => deleteTask(index)}>
-                      {"Yes, I'm sure"}
-                    </Button>
-                    <Button color="gray" onClick={() => setOpenModal(false)}>
-                      No, cancel
-                    </Button>
-                  </div>
+      ></textarea>
+
+      {disableTask ? (
+        <>
+          <Button title="Delete Task" onClick={() => setOpenModal(true)}>
+            Delete
+          </Button>
+          <Modal
+            show={openModal}
+            size="md"
+            onClose={() => setOpenModal(false)}
+            popup
+          >
+            <Modal.Header />
+            <Modal.Body>
+              <div className="text-center">
+                <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
+                <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                  Are you sure you want to delete this Task?
+                </h3>
+                <div className="flex justify-center gap-4">
+                  <Button color="failure" onClick={() => deleteTask(index)}>
+                    {"Yes, I'm sure"}
+                  </Button>
+                  <Button color="gray" onClick={() => setOpenModal(false)}>
+                    No, cancel
+                  </Button>
                 </div>
-              </Modal.Body>
-            </Modal>
-          </>
-        ) : (
-          <Button onClick={addEditedTask}>Add</Button>
-        )}
+              </div>
+            </Modal.Body>
+          </Modal>
+        </>
+      ) : (
+        <Button onClick={addEditedTask}>Add</Button>
+      )}
 
-        {disableTask ? (
-          <button
-            onClick={handleEdit}
-            className="w-fit h-fit text-center border rounded z-10 bg-white hover:bg-slate-100"
-            title="Edit Task"
-            disabled={completeTask}
-          >
-            <img src={Editbtn} alt="Enter" className="p-1 min-w-10 min-h-10" />
-          </button>
-        ) : (
-          <button
-            onClick={handleCancel}
-            className="w-fit h-fit text-center border rounded z-10 bg-white hover:bg-slate-100"
-            title="Cancel Edit Task"
-          >
-            <img
-              src={Cancelbtn}
-              alt="Cancel"
-              className="p-1 min-w-10 min-h-10"
-            />
-          </button>
-        )}
-
-        <input
-          type="checkbox"
-          className="p-1 min-w-8 min-h-8 rounded text-blue-500"
-          onChange={handleStatus}
-          ref={checkRef}
-        />
-      </div>
+      {disableTask ? (
+        <Button onClick={handleEdit} title="Edit Task" disabled={completeTask}>
+          Edit
+        </Button>
+      ) : (
+        <Button onClick={handleCancel} title="Cancel Edit Task">
+          Cancel
+        </Button>
+      )}
     </div>
   );
 };
 
-export default TaskCard;
+export default memo(TaskCard);

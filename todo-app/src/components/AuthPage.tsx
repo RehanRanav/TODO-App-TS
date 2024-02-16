@@ -8,7 +8,7 @@ const AuthPage: FC = () => {
   const dispatch = useDispatch();
 
   return (
-    <div className="flex justify-center items-center h-full">
+    <div className="flex justify-center items-center h-screen">
       <GoogleLogin
         onSuccess={(credentialResponse: any) => {
           const decoded = jwtDecode(credentialResponse?.credential);
