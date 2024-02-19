@@ -14,7 +14,7 @@ const Header = () => {
 
   return (
     <div>
-      <div className="w-full flex justify-end p-4 pr-8 bg-slate-100">
+      <div className="w-full flex justify-end p-4 pr-8 text-[#EEEEEE] bg-slate-800">
         <div className="w-fit flex gap-10 items-center">
           <img
             src={picture}
@@ -23,7 +23,7 @@ const Header = () => {
             title={name}
           />
           <span className="font-mono text-lg font-bold">Hello, {name}</span>
-          <Button onClick={googleLogout}>Logout</Button>
+          <Button onClick={googleLogout} className="bg-[#00ADB5]">Logout</Button>
         </div>
       </div>
     </div>

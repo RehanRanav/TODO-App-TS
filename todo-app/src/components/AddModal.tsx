@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Button, Modal, TextInput } from "flowbite-react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import {
   addTask as addToLocalStorage,
@@ -45,7 +45,7 @@ function AddModal() {
 
   return (
     <>
-      <Button onClick={() => setOpenModal(true)}>ADD TODO</Button>
+      <Button onClick={() => setOpenModal(true)} className="bg-[#00ADB5]">ADD TODO</Button>
       <Modal
         show={openModal}
         size="lg"

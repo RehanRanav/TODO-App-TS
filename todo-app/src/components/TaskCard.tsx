@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, memo } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Modal, Button, Tooltip } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { useSelector, useDispatch } from "react-redux";
@@ -14,13 +14,14 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
   const [completeTask, setCompleteTask] = useState(status);
   const [disableTask, setDisableTask] = useState(true);
   const [taskInput, setTaskInput] = useState(task);
+  const [isEditing, setisEditing] = useState(false);
   const taskInputRef = useRef<HTMLTextAreaElement | null>(null);
   const checkRef = useRef<HTMLInputElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
-  const id = index;
+  const id = `${index}`;
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
+    useSortable({ id, disabled: isEditing });
 
   useEffect(() => {
     setTaskInput(task);
@@ -61,6 +62,7 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
 
   const handleEdit = () => {
     setDisableTask(false);
+    setisEditing(true);
   };
 
   const editTaskInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -93,11 +95,13 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
         toast.error("Please Enter the task...");
         setTaskInput(task);
       }
-      setDisableTask(true);
     } catch (e) {
       toast.error("Something went wrong");
       setTaskInput(task);
       setDisableTask(true);
+    } finally {
+      setDisableTask(true);
+      setisEditing(false);
     }
   };
 
@@ -109,6 +113,7 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
   };
 
   const handleStatus = () => {
+
     let updatedTasks = [...tasks];
     updatedTasks[index] = { ...updatedTasks[index] };
 
@@ -143,13 +148,14 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
       {...attributes}
       {...listeners}
       style={dndStyle}
-      className="bg-orange-100  mx-auto flex justify-between items-center gap-3 border h-fit w-full sm:min-w-fit  p-3 rounded-lg shadow-md font-mono hover:shadow-lg transition duration-300 transform hover:scale-105 touch-none"
+      className={`${completeTask?"bg-slate-300":"bg-[#EEEEEE]"}  mx-auto flex justify-between items-center gap-3 border h-fit w-full sm:min-w-fit  p-3 rounded-lg shadow-md font-mono hover:shadow-lg touch-pan-y scroll-smooth`}
     >
       <div>{index + 1}.</div>
       <Tooltip content="Check to mark as complete" placement="left">
         <input
+          id="yellow-checkbox"
           type="checkbox"
-          className="p-1 min-w-5 min-h-5 rounded text-blue-500"
+          className="p-1 min-w-5 min-h-5 rounded-full text-amber-400 bg-gray-300 border-gray-300 cursor-pointer"
           onChange={handleStatus}
           ref={checkRef}
         />
@@ -175,7 +181,7 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
 
       {disableTask ? (
         <>
-          <Button title="Delete Task" onClick={() => setOpenModal(true)}>
+          <Button title="Delete Task" onClick={() => setOpenModal(true)} className="bg-[#00ADB5]">
             Delete
           </Button>
           <Modal
@@ -204,15 +210,15 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
           </Modal>
         </>
       ) : (
-        <Button onClick={addEditedTask}>Add</Button>
+        <Button onClick={addEditedTask} className="bg-[#00ADB5]">Add</Button>
       )}
 
       {disableTask ? (
-        <Button onClick={handleEdit} title="Edit Task" disabled={completeTask}>
+        <Button onClick={handleEdit} title="Edit Task" disabled={completeTask} className="bg-[#00ADB5]">
           Edit
         </Button>
       ) : (
-        <Button onClick={handleCancel} title="Cancel Edit Task">
+        <Button onClick={handleCancel} title="Cancel Edit Task" className="bg-[#00ADB5]">
           Cancel
         </Button>
       )}
@@ -220,4 +226,4 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
   );
 };
 
-export default memo(TaskCard);
+export default TaskCard;
