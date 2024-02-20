@@ -10,4 +10,4 @@ export interface TaskObject {
 }
 export type Tasklist = {
   taskList: TaskObject[];
-}
+};

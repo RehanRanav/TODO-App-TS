@@ -1,8 +1,11 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Button, Modal, TextInput } from "flowbite-react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { addTask as addToLocalStorage } from "../reducers/taskSlice";
+import {
+  addTask as addToLocalStorage,
+  selectTask,
+} from "../reducers/taskSlice";
 
 function AddModal() {
   const [openModal, setOpenModal] = useState(false);
@@ -15,7 +18,12 @@ function AddModal() {
         let inputTask = taskInputRef.current?.value;
         inputTask = inputTask.trim();
         if (inputTask.length > 0) {
-          dispatch(addToLocalStorage({ task: inputTask, status: false }));
+          dispatch(
+            addToLocalStorage({
+              task: inputTask,
+              status: false,
+            })
+          );
           toast.success("Task Added Successfully...");
         } else {
           toast.error("Please Enter the task...");
@@ -27,7 +35,6 @@ function AddModal() {
       toast.error("Something went wrong");
       setOpenModal(false);
     }
-
   }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -38,7 +45,7 @@ function AddModal() {
 
   return (
     <>
-      <Button onClick={() => setOpenModal(true)}>ADD TODO</Button>
+      <Button onClick={() => setOpenModal(true)} className="bg-[#00ADB5]">ADD TODO</Button>
       <Modal
         show={openModal}
         size="lg"
