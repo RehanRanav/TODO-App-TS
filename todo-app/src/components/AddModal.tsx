@@ -1,18 +1,25 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Button, Modal, TextInput } from "flowbite-react";
-import { useDispatch } from "react-redux";
+import { Button, Datepicker, Modal, TextInput, Tooltip } from "flowbite-react";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import {
-  addTask as addToLocalStorage,
-  selectTask,
-} from "../reducers/taskSlice";
+import { addTask as addToLocalStorage } from "../reducers/taskSlice";
+import { selectUser } from "../reducers/userSlice";
+import { customAlphabet } from "nanoid";
 
 function AddModal() {
   const [openModal, setOpenModal] = useState(false);
   const taskInputRef = useRef<HTMLInputElement | null>(null);
   const dispatch = useDispatch();
+  const { email } = useSelector(selectUser) || {};
 
-  const addTask = useCallback(() => {
+  const commonPrefix = "A";
+  const generateRandomNumber = () => {
+    const nanoid = customAlphabet("1234567890", 4);
+    const randomNumber = nanoid();
+    return commonPrefix + randomNumber;
+  };
+
+  const addTask = () => {
     try {
       if (taskInputRef.current) {
         let inputTask = taskInputRef.current?.value;
@@ -20,8 +27,10 @@ function AddModal() {
         if (inputTask.length > 0) {
           dispatch(
             addToLocalStorage({
+              id: generateRandomNumber(),
               task: inputTask,
               status: false,
+              user: email,
             })
           );
           toast.success("Task Added Successfully...");
@@ -35,7 +44,7 @@ function AddModal() {
       toast.error("Something went wrong");
       setOpenModal(false);
     }
-  }, []);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -45,7 +54,11 @@ function AddModal() {
 
   return (
     <>
-      <Button onClick={() => setOpenModal(true)} className="bg-[#00ADB5]">ADD TODO</Button>
+      <Tooltip content="Click to Add ToDo Task">
+        <Button onClick={() => setOpenModal(true)} className="bg-[#00ADB5]">
+          ADD TODO
+        </Button>
+      </Tooltip>
       <Modal
         show={openModal}
         size="lg"
@@ -68,6 +81,14 @@ function AddModal() {
                 autoComplete="off"
                 required
               />
+            </div>
+            <div>
+              <h4 className="text-lg text-gray-900 dark:text-white">
+                Set Deadline
+              </h4>
+              <div>
+                <Datepicker className=""/>
+              </div>
             </div>
             <div className="w-full">
               <Button onClick={addTask}>Add Todo</Button>

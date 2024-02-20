@@ -12,6 +12,7 @@ import {
   KeyboardSensor,
   PointerSensor,
   TouchSensor,
+  UniqueIdentifier,
   closestCorners,
   useSensor,
   useSensors,
@@ -22,22 +23,27 @@ import AddModal from "./AddModal";
 import TaskCard from "./TaskCard";
 import Header from "./Header";
 import Notask from "../images/Notasks.jpg";
+import { selectUser } from "../reducers/userSlice";
 
 const HomePage: FC = () => {
   const tasks = useSelector(selectTask);
+  const { email } = useSelector(selectUser) || {};
   const dispatch = useDispatch();
-  const [todoList, setTodoList] = useState(tasks);
+  const [todoList, setTodoList] = useState(
+    tasks.filter((task) => task.user === email)
+  );
+
   const sensors = useSensors(
-    useSensor(PointerSensor,{
-      activationConstraint:{
-        distance: 10
-      }
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
     }),
-    useSensor(TouchSensor,{
-      activationConstraint:{
+    useSensor(TouchSensor, {
+      activationConstraint: {
         delay: 200,
-        tolerance:6
-      }
+        tolerance: 6,
+      },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -56,17 +62,23 @@ const HomePage: FC = () => {
     setTimeout(() => {
       localStorage.setItem("tasklist", JSON.stringify(tasks));
     }, 800);
-    setTodoList(tasks);
+    setTodoList(tasks.filter((task) => task.user === email));
   }, [tasks]);
+
+  const getTaskPos = (id: UniqueIdentifier) =>
+    tasks.findIndex((task) => task.id === id);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (active.id === over?.id) return;
+    if (active.id === over?.id || !over) return;
+
+    const originalPos = getTaskPos(active.id);
+    const newPos = getTaskPos(over?.id);
 
     const updatedTasks = arrayMove(
       tasks,
-      active.id as number,
-      over?.id as number
+      originalPos as number,
+      newPos as number
     );
     dispatch(setTask(updatedTasks));
   };
@@ -75,7 +87,21 @@ const HomePage: FC = () => {
     <div className="w-full text-center h-full">
       <Header />
 
-      <div className="flex justify-center mt-14">
+      <div className="font-mono w-fit flex flex-col p-2 text-left  text-[#EEEEEE]">
+        <span>Total Tasks: {todoList.length}</span>
+        <span className="flex gap-1 items-center text-[#EEEEEE]">
+          <div className="w-1 h-4 bg-[#EEEEEE] rounded-full"></div>
+          Pending Tasks:{" "}
+          {todoList.filter((task) => task.status == false).length}
+        </span>
+        <span className="flex gap-1 items-center text-slate-300">
+          <div className="w-1 h-4 bg-slate-300 rounded-full"></div>
+          Completed Tasks:{" "}
+          {todoList.filter((task) => task.status == true).length}
+        </span>
+      </div>
+
+      <div className="flex justify-center">
         <AddModal />
       </div>
       <div className="flex flex-col gap-5 justify-center items-center w-1/2 m-auto p-5 max-sm:w-full">
@@ -85,14 +111,15 @@ const HomePage: FC = () => {
           collisionDetection={closestCorners}
         >
           <SortableContext
-            items={todoList.map((task, index) => `${index}`)}
+            items={todoList.map((task) => task.id)}
             strategy={verticalListSortingStrategy}
           >
             {todoList.length > 0 ? (
               todoList.map((task, index) => {
                 return (
                   <TaskCard
-                    key={index}
+                    key={task.id}
+                    id={task.id}
                     index={index}
                     task={task.task}
                     status={task.status}
@@ -100,11 +127,11 @@ const HomePage: FC = () => {
                 );
               })
             ) : (
-              <div className="font-mono text-lg font-bold">
+              <div className="flex flex-col justify-center items-center font-mono text-lg font-bold text-[#EEEEEE]">
                 <img
                   src={Notask}
                   alt="No Task Found"
-                  className="m-auto p-auto w-1/2 my-4"
+                  className="w-1/3 my-4 rounded"
                 />
                 Nothing To do...
               </div>

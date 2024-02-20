@@ -5,10 +5,11 @@ import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { UniqueIdentifier } from "@dnd-kit/core";
 import { TaskCardProps } from "../interface";
 import { selectTask, setTask, removeTask } from "../reducers/taskSlice";
 
-const TaskCard = ({ task, index, status }: TaskCardProps) => {
+const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
   const tasks = useSelector(selectTask);
   const [openModal, setOpenModal] = useState(false);
   const [completeTask, setCompleteTask] = useState(status);
@@ -19,7 +20,6 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
   const checkRef = useRef<HTMLInputElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
-  const id = `${index}`;
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id, disabled: isEditing });
 
@@ -49,6 +49,7 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
       if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
         setTaskInput(task);
         setDisableTask(true);
+        setisEditing(false)
       }
     };
 
@@ -59,6 +60,9 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
       document.removeEventListener("click", handleClickOutside);
     };
   }, [disableTask]);
+
+  const getTaskPos = (id: UniqueIdentifier) =>
+    tasks.findIndex((task) => task.id === id);
 
   const handleEdit = () => {
     setDisableTask(false);
@@ -72,6 +76,7 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
   const handleCancel = () => {
     setTaskInput(task);
     setDisableTask(true);
+    setisEditing(false);
   };
 
   const addEditedTask = () => {
@@ -81,9 +86,11 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
         inputTask = inputTask.trim();
         if (inputTask.length > 0) {
           let updatedTasks = [...tasks];
-          updatedTasks[index] = { ...updatedTasks[index] };
+          const i = getTaskPos(id);
 
-          updatedTasks[index].task = inputTask;
+          updatedTasks[i] = { ...updatedTasks[i] };
+
+          updatedTasks[i].task = inputTask;
 
           dispatch(setTask(updatedTasks));
           toast.success("Task Edited Successfully...");
@@ -105,19 +112,20 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
     }
   };
 
-  const deleteTask = (index: number) => {
-    dispatch(removeTask(index));
+  const deleteTask = (id: UniqueIdentifier) => {
+    const i = getTaskPos(id);
+    dispatch(removeTask(i));
 
     setOpenModal(false);
     toast.warning("Task Deleted Successfully...");
   };
 
   const handleStatus = () => {
-
     let updatedTasks = [...tasks];
-    updatedTasks[index] = { ...updatedTasks[index] };
+    const i = getTaskPos(id);
+    updatedTasks[i] = { ...updatedTasks[i] };
 
-    updatedTasks[index].status = !completeTask;
+    updatedTasks[i].status = !completeTask;
 
     dispatch(setTask(updatedTasks));
     if (!completeTask) {
@@ -148,14 +156,16 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
       {...attributes}
       {...listeners}
       style={dndStyle}
-      className={`${completeTask?"bg-slate-300":"bg-[#EEEEEE]"}  mx-auto flex justify-between items-center gap-3 border h-fit w-full sm:min-w-fit  p-3 rounded-lg shadow-md font-mono hover:shadow-lg touch-pan-y scroll-smooth`}
+      className={`${
+        completeTask ? "bg-slate-300" : "bg-[#EEEEEE]"
+      } focus:cursor-grabbing mx-auto flex justify-between items-center gap-3 border h-fit w-full sm:min-w-fit  p-3 rounded-lg shadow-md font-mono hover:shadow-lg touch-pan-y scroll-smooth`}
     >
       <div>{index + 1}.</div>
       <Tooltip content="Check to mark as complete" placement="left">
         <input
           id="yellow-checkbox"
           type="checkbox"
-          className="p-1 min-w-5 min-h-5 rounded-full text-amber-400 bg-gray-300 border-gray-300 cursor-pointer"
+          className="p-1 min-w-5 min-h-5 rounded-full text-green-400 bg-gray-300 border-gray-300 cursor-pointer"
           onChange={handleStatus}
           ref={checkRef}
         />
@@ -164,7 +174,7 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
       <textarea
         ref={taskInputRef}
         id="todotask"
-        className={`h-fit bg-inherit text-lg resize-none flex-1 border-none text-gray-900 font-bold rounded block w-fit p-2.5${
+        className={`p-[4px] h-fit bg-inherit text-lg resize-none flex-1 border-none text-gray-900 font-bold rounded block w-fit p-2.5${
           completeTask ? "line-through opacity-50" : ""
         }`}
         style={{
@@ -181,7 +191,11 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
 
       {disableTask ? (
         <>
-          <Button title="Delete Task" onClick={() => setOpenModal(true)} className="bg-[#00ADB5]">
+          <Button
+            title="Delete Task"
+            onClick={() => setOpenModal(true)}
+            className="bg-[#00ADB5]"
+          >
             Delete
           </Button>
           <Modal
@@ -198,7 +212,7 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
                   Are you sure you want to delete this Task?
                 </h3>
                 <div className="flex justify-center gap-4">
-                  <Button color="failure" onClick={() => deleteTask(index)}>
+                  <Button color="failure" onClick={() => deleteTask(id)}>
                     {"Yes, I'm sure"}
                   </Button>
                   <Button color="gray" onClick={() => setOpenModal(false)}>
@@ -210,15 +224,26 @@ const TaskCard = ({ task, index, status }: TaskCardProps) => {
           </Modal>
         </>
       ) : (
-        <Button onClick={addEditedTask} className="bg-[#00ADB5]">Add</Button>
+        <Button onClick={addEditedTask} className="bg-[#00ADB5]">
+          Add
+        </Button>
       )}
 
       {disableTask ? (
-        <Button onClick={handleEdit} title="Edit Task" disabled={completeTask} className="bg-[#00ADB5]">
+        <Button
+          onClick={handleEdit}
+          title="Edit Task"
+          disabled={completeTask}
+          className="bg-[#00ADB5]"
+        >
           Edit
         </Button>
       ) : (
-        <Button onClick={handleCancel} title="Cancel Edit Task" className="bg-[#00ADB5]">
+        <Button
+          onClick={handleCancel}
+          title="Cancel Edit Task"
+          className="bg-[#00ADB5]"
+        >
           Cancel
         </Button>
       )}
