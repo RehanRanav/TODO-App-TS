@@ -1,4 +1,5 @@
 import { UniqueIdentifier } from "@dnd-kit/core";
+import dayjs from "dayjs";
 
 export interface TaskCardProps {
   id: UniqueIdentifier;
@@ -12,6 +13,7 @@ export interface TaskObject {
   task: string;
   status: boolean;
   user: string;
+  deadline: dayjs.Dayjs;
 }
 export type Tasklist = {
   taskList: TaskObject[];
