@@ -1,18 +1,19 @@
-import React, { useState, useRef } from "react";
-import { Button, Modal, TextInput, Tooltip, Datepicker } from "flowbite-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Button, Modal, TextInput, Tooltip } from "flowbite-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { addTask as addToLocalStorage } from "../reducers/taskSlice";
-import { selectUser } from "../reducers/userSlice";
 import { customAlphabet } from "nanoid";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { MobileDateTimePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from "dayjs";
+import { addTask as addToLocalStorage } from "../reducers/taskSlice";
+import { selectUser } from "../reducers/userSlice";
+import { MobileDateTimePicker } from "@mui/x-date-pickers";
 
 function AddModal() {
   const [openModal, setOpenModal] = useState(false);
   const [taskDeadline, setTaskDeadline] = useState<dayjs.Dayjs>(dayjs);
+  const [anchorEl, setAnchorEl] = React.useState(null);
   const taskInputRef = useRef<HTMLInputElement | null>(null);
   const dispatch = useDispatch();
   const { email } = useSelector(selectUser) || {};
@@ -24,8 +25,11 @@ function AddModal() {
     return commonPrefix + randomNumber;
   };
 
+  useEffect(() => {
+    setTaskDeadline(dayjs());
+  }, [openModal]);
+
   const addTask = () => {
-    
     try {
       if (taskInputRef.current) {
         let inputTask = taskInputRef.current?.value;
@@ -46,7 +50,6 @@ function AddModal() {
         }
         taskInputRef.current.value = ``;
         setOpenModal(false);
-        setTaskDeadline(dayjs);
       }
     } catch (e) {
       toast.error("Something went wrong");
@@ -98,11 +101,13 @@ function AddModal() {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <MobileDateTimePicker
                     value={taskDeadline}
+                    minDate={dayjs()}
                     onChange={(newDeadline: dayjs.Dayjs | null) => {
                       if (newDeadline) {
                         setTaskDeadline(newDeadline);
                       }
-                    }}
+                    }} 
+
                     className="rounded"
                     sx={{
                       "& .MuiInputBase-root": {
@@ -116,7 +121,11 @@ function AddModal() {
                         boxShadow: "none",
                         borderColor: "#f9fafb",
                       },
-                    }}
+                      "& .MuiButtonBase-root":{
+                        position: "absolute",
+                      },
+                      
+                    }} 
                   />
                 </LocalizationProvider>
               </div>

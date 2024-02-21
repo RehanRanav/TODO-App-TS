@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Modal, Button, Tooltip } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { useSelector, useDispatch } from "react-redux";
+import dayjs from "dayjs";
+import { formatDistanceToNow } from "date-fns";
 import { toast } from "react-toastify";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -16,12 +18,29 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
   const [disableTask, setDisableTask] = useState(true);
   const [taskInput, setTaskInput] = useState(task);
   const [isEditing, setisEditing] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const [deadlineStatus, setDeadlineStatus] = useState("");
   const taskInputRef = useRef<HTMLTextAreaElement | null>(null);
   const checkRef = useRef<HTMLInputElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id, disabled: isEditing });
+
+  useEffect(() => {
+    const checkRemainingTime = () => {
+      const taskDeadlineTime = dayjs(
+        tasks[getTaskPos(id)].deadline,
+        "MM/DD/YYYY hh:mm A"
+      ).toDate();
+
+      setDeadlineStatus(
+        formatDistanceToNow(taskDeadlineTime, { addSuffix: true })
+      );
+    };
+    const intervalID = setInterval(checkRemainingTime, 1000);
+    return () => clearInterval(intervalID);
+  }, []);
 
   useEffect(() => {
     setTaskInput(task);
@@ -49,7 +68,7 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
       if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
         setTaskInput(task);
         setDisableTask(true);
-        setisEditing(false)
+        setisEditing(false);
       }
     };
 
@@ -155,10 +174,12 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
       }}
       {...attributes}
       {...listeners}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
       style={dndStyle}
       className={`${
         completeTask ? "bg-slate-300" : "bg-[#EEEEEE]"
-      } focus:cursor-grabbing mx-auto flex justify-between items-center gap-3 border h-fit w-full sm:min-w-fit  p-3 rounded-lg shadow-md font-mono hover:shadow-lg touch-pan-y scroll-smooth`}
+      } focus:cursor-grabbing mx-auto flex justify-between items-center gap-3 border h-fit w-full sm:min-w-fit  p-3 rounded-lg hover:rounded-tl-none shadow-md font-mono hover:shadow-lg touch-pan-y scroll-smooth relative`}
     >
       <div>{index + 1}.</div>
       <Tooltip content="Check to mark as complete" placement="left">
@@ -247,6 +268,16 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
           Cancel
         </Button>
       )}
+
+      {isHovering ? (
+        <div
+          className={`w-fit h-fit p-0.5 absolute -top-7 -left-0 rounded-t-lg ${
+            deadlineStatus.includes("ago") ? "bg-red-200" : "bg-yellow-100"
+          }`}
+        >
+          Remaining Time:{deadlineStatus}
+        </div>
+      ) : null}
     </div>
   );
 };

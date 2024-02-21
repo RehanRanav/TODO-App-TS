@@ -104,7 +104,7 @@ const HomePage: FC = () => {
       <div className="flex justify-center">
         <AddModal />
       </div>
-      <div className="flex flex-col gap-5 justify-center items-center w-1/2 m-auto p-5 max-sm:w-full">
+      <div className="flex flex-col gap-8 justify-center items-center w-1/2 mt-3 m-auto p-5 max-sm:w-full">
         <DndContext
           onDragEnd={handleDragEnd}
           sensors={sensors}
