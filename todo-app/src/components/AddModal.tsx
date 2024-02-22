@@ -4,16 +4,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { customAlphabet } from "nanoid";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { addTask as addToLocalStorage } from "../reducers/taskSlice";
 import { selectUser } from "../reducers/userSlice";
-import { MobileDateTimePicker } from "@mui/x-date-pickers";
+import { DateTimePicker } from "@mui/x-date-pickers";
 
 function AddModal() {
   const [openModal, setOpenModal] = useState(false);
-  const [taskDeadline, setTaskDeadline] = useState<dayjs.Dayjs>(dayjs);
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [taskDeadline, setTaskDeadline] = useState<dayjs.Dayjs>(
+    dayjs().add(30, "minutes")
+  );
   const taskInputRef = useRef<HTMLInputElement | null>(null);
   const dispatch = useDispatch();
   const { email } = useSelector(selectUser) || {};
@@ -26,7 +27,7 @@ function AddModal() {
   };
 
   useEffect(() => {
-    setTaskDeadline(dayjs());
+    setTaskDeadline(dayjs().add(30, "minutes"));
   }, [openModal]);
 
   const addTask = () => {
@@ -34,7 +35,7 @@ function AddModal() {
       if (taskInputRef.current) {
         let inputTask = taskInputRef.current?.value;
         inputTask = inputTask.trim();
-        if (inputTask.length > 0) {
+        if (inputTask.length > 0 && dayjs().isBefore(taskDeadline)) {
           dispatch(
             addToLocalStorage({
               id: generateRandomNumber(),
@@ -45,11 +46,11 @@ function AddModal() {
             })
           );
           toast.success("Task Added Successfully...");
+          setOpenModal(false);
+          taskInputRef.current.value = ``;
         } else {
-          toast.error("Please Enter the task...");
+          taskInputRef.current.style.borderColor = "red";
         }
-        taskInputRef.current.value = ``;
-        setOpenModal(false);
       }
     } catch (e) {
       toast.error("Something went wrong");
@@ -58,6 +59,8 @@ function AddModal() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (taskInputRef.current)
+      taskInputRef.current.style.borderColor = "#1C64F2";
     if (e.key === "Enter") {
       addTask();
     }
@@ -66,7 +69,10 @@ function AddModal() {
   return (
     <>
       <Tooltip content="Click to Add ToDo Task">
-        <Button onClick={() => setOpenModal(true)} className="bg-[#00ADB5]">
+        <Button
+          onClick={() => setOpenModal(true)}
+          className="bg-[#00ADB5] rounded"
+        >
           ADD TODO
         </Button>
       </Tooltip>
@@ -84,13 +90,13 @@ function AddModal() {
               ADD Todo
             </h3>
             <div>
-              <TextInput
+              <input
                 id="task"
                 ref={taskInputRef}
                 placeholder="Enter Your Task"
                 onKeyDown={(e) => handleKeyDown(e)}
                 autoComplete="off"
-                required
+                className="rounded p-2 bg-[#f9fafb] w-full border outline-none border-[#bfc0c1] hover:border-black focus:border-[#1C64F2] focus:border-2"
               />
             </div>
             <div>
@@ -99,15 +105,20 @@ function AddModal() {
               </h4>
               <div className="flex gap-1">
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <MobileDateTimePicker
+                  <DateTimePicker
                     value={taskDeadline}
-                    minDate={dayjs()}
+                    minDateTime={dayjs()}
                     onChange={(newDeadline: dayjs.Dayjs | null) => {
                       if (newDeadline) {
                         setTaskDeadline(newDeadline);
                       }
-                    }} 
-
+                    }}
+                    slotProps={{
+                      popper: {
+                        placement: "right-end",
+                        style: { width: "40%", height: "50%" },
+                      },
+                    }}
                     className="rounded"
                     sx={{
                       "& .MuiInputBase-root": {
@@ -121,17 +132,18 @@ function AddModal() {
                         boxShadow: "none",
                         borderColor: "#f9fafb",
                       },
-                      "& .MuiButtonBase-root":{
+                      "& .MuiButtonBase-root": {
                         position: "absolute",
                       },
-                      
-                    }} 
+                    }}
                   />
                 </LocalizationProvider>
               </div>
             </div>
             <div className="w-full">
-              <Button onClick={addTask}>Add Todo</Button>
+              <Button onClick={addTask} className="rounded">
+                Add Todo
+              </Button>
             </div>
           </div>
         </Modal.Body>

@@ -24,7 +24,7 @@ const Header = () => {
             />
           </Tooltip>
           <span className="font-mono text-lg font-bold">Hello, {name}</span>
-          <Button onClick={googleLogout} className="bg-[#00ADB5]">
+          <Button onClick={googleLogout} className="bg-[#00ADB5] rounded-full">
             Logout
           </Button>
         </div>

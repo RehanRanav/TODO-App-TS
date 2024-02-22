@@ -27,7 +27,7 @@ const App: FC = () => {
   }, []);
 
   return (
-    <div className="App overflow-x-hidden min-h-screen bg-[#393E46] touch-none">
+    <div className="App overflow-hidden min-h-screen bg-[#393E46] touch-none">
       <ToastContainer
         position="top-left"
         autoClose={3000}

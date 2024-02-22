@@ -179,7 +179,7 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
       style={dndStyle}
       className={`${
         completeTask ? "bg-slate-300" : "bg-[#EEEEEE]"
-      } focus:cursor-grabbing mx-auto flex justify-between items-center gap-3 border h-fit w-full sm:min-w-fit  p-3 rounded-lg hover:rounded-tl-none shadow-md font-mono hover:shadow-lg touch-pan-y scroll-smooth relative`}
+      } focus:cursor-grabbing mx-auto flex justify-between items-center gap-3 border h-fit w-full   p-3 rounded hover:rounded-tl-none shadow-md font-mono hover:shadow-lg touch-pan-y scroll-smooth relative`}
     >
       <div>{index + 1}.</div>
       <Tooltip content="Check to mark as complete" placement="left">
@@ -271,11 +271,16 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
 
       {isHovering ? (
         <div
-          className={`w-fit h-fit p-0.5 absolute -top-7 -left-0 rounded-t-lg ${
+          className={`w-fit h-fit p-0.5 absolute -top-7 -left-0 rounded-t ${
             deadlineStatus.includes("ago") ? "bg-red-200" : "bg-yellow-100"
           }`}
         >
-          Remaining Time:{deadlineStatus}
+          {deadlineStatus.includes("ago") ? (
+            <>Overdue Time:</>
+          ) : (
+            <>Remaining Time:</>
+          )}
+          {deadlineStatus}
         </div>
       ) : null}
     </div>

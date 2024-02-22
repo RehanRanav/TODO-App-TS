@@ -24,6 +24,7 @@ import TaskCard from "./TaskCard";
 import Header from "./Header";
 import Notask from "../images/Notasks.jpg";
 import { selectUser } from "../reducers/userSlice";
+import dayjs from "dayjs";
 
 const HomePage: FC = () => {
   const tasks = useSelector(selectTask);
@@ -84,60 +85,70 @@ const HomePage: FC = () => {
   };
 
   return (
-    <div className="w-full text-center h-full">
-      <Header />
+    <div className="w-full text-center">
+      <div className="w-full sticky top-0 left-0 z-20 bg-[#393E46]">
+        <Header />
 
-      <div className="font-mono w-fit flex flex-col p-2 text-left  text-[#EEEEEE]">
-        <span>Total Tasks: {todoList.length}</span>
-        <span className="flex gap-1 items-center text-[#EEEEEE]">
-          <div className="w-1 h-4 bg-[#EEEEEE] rounded-full"></div>
-          Pending Tasks:{" "}
-          {todoList.filter((task) => task.status == false).length}
-        </span>
-        <span className="flex gap-1 items-center text-slate-300">
-          <div className="w-1 h-4 bg-slate-300 rounded-full"></div>
-          Completed Tasks:{" "}
-          {todoList.filter((task) => task.status == true).length}
-        </span>
-      </div>
+        <div className="font-mono w-fit flex flex-col p-2 text-left  text-[#EEEEEE]">
+          <span>Total Tasks: {todoList.length}</span>
+          <span className="flex gap-1 items-center text-[#EEEEEE]">
+            <div className="w-1 h-4 bg-[#EEEEEE] rounded-full"></div>
+            Pending Tasks:{" "}
+            {todoList.filter((task) => task.status == false).length}
+          </span>
+          <span className="flex gap-1 items-center text-slate-300">
+            <div className="w-1 h-4 bg-slate-300 rounded-full"></div>
+            Completed Tasks:{" "}
+            {todoList.filter((task) => task.status == true).length}
+          </span>
+          <span className="flex gap-1 items-center text-red-200">
+            <div className="w-1 h-4 bg-red-200 rounded-full"></div>
+            OverDue Tasks:{" "}
+            {todoList.filter((todo) => dayjs().isAfter(todo.deadline)).length}
+            {}
+          </span>
+        </div>
 
-      <div className="flex justify-center">
-        <AddModal />
+        <div className="flex justify-center">
+          <AddModal />
+        </div>
       </div>
-      <div className="flex flex-col gap-8 justify-center items-center w-1/2 mt-3 m-auto p-5 max-sm:w-full">
-        <DndContext
-          onDragEnd={handleDragEnd}
-          sensors={sensors}
-          collisionDetection={closestCorners}
-        >
-          <SortableContext
-            items={todoList.map((task) => task.id)}
-            strategy={verticalListSortingStrategy}
+      <div className="w-full pt-24 overflow-y-auto">
+        <div className="flex flex-col gap-8 justify-center items-center w-1/2 h-96 m-auto p-5 max-sm:w-full">
+          <DndContext
+            onDragEnd={handleDragEnd}
+            sensors={sensors}
+            collisionDetection={closestCorners}
           >
-            {todoList.length > 0 ? (
-              todoList.map((task, index) => {
-                return (
-                  <TaskCard
-                    key={task.id}
-                    id={task.id}
-                    index={index}
-                    task={task.task}
-                    status={task.status}
+            <SortableContext
+              items={todoList.map((task) => task.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {todoList.length > 0 ? (
+                todoList.map((task, index) => {
+                  return (
+                    <TaskCard
+                      key={task.id}
+                      id={task.id}
+                      index={index}
+                      task={task.task}
+                      status={task.status}
+                    />
+                  );
+                })
+              ) : (
+                <div className="flex flex-col justify-center items-center font-mono text-lg font-bold text-[#EEEEEE]">
+                  <img
+                    src={Notask}
+                    alt="No Task Found"
+                    className="w-1/3 my-4 rounded"
                   />
-                );
-              })
-            ) : (
-              <div className="flex flex-col justify-center items-center font-mono text-lg font-bold text-[#EEEEEE]">
-                <img
-                  src={Notask}
-                  alt="No Task Found"
-                  className="w-1/3 my-4 rounded"
-                />
-                Nothing To do...
-              </div>
-            )}
-          </SortableContext>
-        </DndContext>
+                  Nothing To do...
+                </div>
+              )}
+            </SortableContext>
+          </DndContext>
+        </div>
       </div>
     </div>
   );
