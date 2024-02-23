@@ -1,6 +1,5 @@
 import { FC } from "react";
 import { GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
 import { useDispatch } from "react-redux";
 import { setUser } from "../reducers/userSlice";
 
@@ -30,8 +29,7 @@ const AuthPage: FC = () => {
       <div className="w-fit rounded-full">
         <GoogleLogin
         onSuccess={(credentialResponse: any) => {
-          const decoded = jwtDecode(credentialResponse?.credential);
-          dispatch(setUser(decoded));
+          dispatch(setUser(credentialResponse?.credential));
         }}
         onError={() => {
           console.log("Login Failed");

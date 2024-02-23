@@ -19,19 +19,18 @@ const App: FC = () => {
   };
 
   useEffect(() => {
-    let logedUser: string | null | Tasklist = localStorage.getItem("user");
+    let logedUser: string | null  = localStorage.getItem("user");
     if (logedUser) {
-      logedUser = JSON.parse(logedUser) as Tasklist;
       dispatch(setUser(logedUser));
     }
   }, []);
 
   return (
-    <div className="App overflow-x-hidden min-h-screen bg-[#393E46] touch-none">
+    <div className="App overflow-x-hidden min-h-screen bg-sky-50 touch-none">
       <ToastContainer
-        position="top-left"
+        position="bottom-right"
         autoClose={3000}
-        hideProgressBar={false}
+        hideProgressBar
         newestOnTop={false}
         closeOnClick
         rtl={false}

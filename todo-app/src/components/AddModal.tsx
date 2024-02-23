@@ -9,15 +9,17 @@ import dayjs from "dayjs";
 import { addTask as addToLocalStorage } from "../reducers/taskSlice";
 import { selectUser } from "../reducers/userSlice";
 import { DateTimePicker } from "@mui/x-date-pickers";
+import { jwtDecode } from "jwt-decode";
 
 function AddModal() {
   const [openModal, setOpenModal] = useState(false);
+  const [email, setEmail] = useState();
   const [taskDeadline, setTaskDeadline] = useState<dayjs.Dayjs>(
     dayjs().add(30, "minutes")
   );
   const taskInputRef = useRef<HTMLInputElement | null>(null);
   const dispatch = useDispatch();
-  const { email } = useSelector(selectUser) || {};
+  const credential = useSelector(selectUser) || "";
 
   const commonPrefix = "A";
   const generateRandomNumber = () => {
@@ -25,6 +27,11 @@ function AddModal() {
     const randomNumber = nanoid();
     return commonPrefix + randomNumber;
   };
+
+  useEffect(() => {
+    const decoded: Record<string, any> = jwtDecode(credential);
+    setEmail(decoded.email);
+  }, [credential]);
 
   useEffect(() => {
     setTaskDeadline(dayjs().add(30, "minutes"));
@@ -68,10 +75,10 @@ function AddModal() {
 
   return (
     <>
-      <Tooltip content="Click to Add ToDo Task">
+      <Tooltip content="Click to Add ToDo Task" arrow={false}>
         <Button
           onClick={() => setOpenModal(true)}
-          className="bg-[#00ADB5] rounded"
+          className="bg-[#4da0e6] rounded"
         >
           ADD TODO
         </Button>

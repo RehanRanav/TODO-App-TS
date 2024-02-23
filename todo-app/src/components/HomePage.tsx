@@ -18,17 +18,22 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import dayjs from "dayjs";
+import {  HiClock } from "react-icons/hi";
+import { FaListAlt, FaCheckCircle } from "react-icons/fa";
+import { AiFillCloseCircle } from "react-icons/ai";
+import { jwtDecode } from "jwt-decode";
 import { selectTask, setTask } from "../reducers/taskSlice";
+import { selectUser } from "../reducers/userSlice";
 import { TaskObject } from "../interface";
 import AddModal from "./AddModal";
 import TaskCard from "./TaskCard";
 import Header from "./Header";
 import Notask from "../images/Notasks.jpg";
-import { selectUser } from "../reducers/userSlice";
 
 const HomePage: FC = () => {
   const tasks = useSelector(selectTask);
-  const { email } = useSelector(selectUser) || {};
+  const credential = useSelector(selectUser) || "";
+  const [email, setEmail] = useState();
   const dispatch = useDispatch();
   const [todoList, setTodoList] = useState(
     tasks.filter((task) => task.user === email)
@@ -65,7 +70,7 @@ const HomePage: FC = () => {
       localStorage.setItem("tasklist", JSON.stringify(tasks));
     }, 800);
     setTodoList(tasks.filter((task) => task.user === email));
-  }, [tasks]);
+  }, [tasks, email]);
 
   useEffect(() => {
     if (todoListScrollRef.current) {
@@ -75,6 +80,11 @@ const HomePage: FC = () => {
       });
     }
   }, [todoList]);
+
+  useEffect(() => {
+    const decoded: Record<string, any> = jwtDecode(credential);
+    setEmail(decoded.email);
+  }, [credential]);
 
   const getTaskPos = (id: UniqueIdentifier) =>
     tasks.findIndex((task) => task.id === id);
@@ -98,31 +108,38 @@ const HomePage: FC = () => {
     <div className="w-full text-center h-full">
       <Header />
 
-      <div className="font-mono w-fit flex flex-col p-2 text-left  text-[#EEEEEE]">
-        <span>Total Tasks: {todoList.length}</span>
-        <span className="flex gap-1 items-center text-[#EEEEEE]">
-          <div className="w-1 h-4 bg-[#EEEEEE] rounded-full"></div>
-          Pending Tasks:{" "}
-          {todoList.filter((task) => task.status == false).length}
-        </span>
-        <span className="flex gap-1 items-center text-slate-300">
-          <div className="w-1 h-4 bg-slate-300 rounded-full"></div>
-          Completed Tasks:{" "}
-          {todoList.filter((task) => task.status == true).length}
-        </span>
-        <span className="flex gap-1 items-center text-red-200">
-          <div className="w-1 h-4 bg-red-200 rounded-full"></div>
-          OverDue Tasks:{" "}
-          {todoList.filter((todo) => dayjs().isAfter(todo.deadline)).length}
-          {}
-        </span>
+      <div className="font-mono w-4/5 grid grid-cols-4 gap-4 p-2 m-auto mt-1">
+        <div className="bg-white p-2 rounded flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out">
+          <FaListAlt color="#38bdf8" size={24}/>
+          <span className="text-2xl font-bold">{todoList.length}</span>
+          <span className="flex items-center">
+            Total Tasks</span>
+        </div>
+        <div className="bg-white py-4 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out">
+          <HiClock color="#fde047" size={24}/>
+          <span className="text-2xl font-bold"> {todoList.filter((task) => task.status == false).length}</span>
+          <span className="flex items-center">
+          Pending Tasks</span>
+        </div>
+        <div className="bg-white p-2 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out">
+          <FaCheckCircle color="#86efac" size={24}/>
+          <span className="text-2xl font-bold"> {todoList.filter((task) => task.status == true).length}</span>
+          <span className="flex items-center">
+          Completed Tasks</span>
+        </div>
+        <div className="bg-white p-2 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out">
+          <AiFillCloseCircle color="#fca5a5" size={24}/>
+          <span className="text-2xl font-bold"> {todoList.filter((todo) => dayjs().isAfter(todo.deadline)).length}</span>
+          <span className="flex items-center">
+          OverDue Tasks</span>
+        </div>
       </div>
 
-      <div className="flex justify-center">
+      <div className="flex justify-center mt-10">
         <AddModal />
       </div>
       <div className=" w-1/2 m-auto p-5 max-sm:w-full h-auto ">
-        <div className="h-[320px] px-4 py-8 overflow-y-auto overflow-x-hidden">
+        <div className="h-[340px] px-4 py-8 overflow-y-auto overflow-x-hidden">
           <DndContext
             onDragEnd={handleDragEnd}
             sensors={sensors}
@@ -132,11 +149,7 @@ const HomePage: FC = () => {
               items={todoList.map((task) => task.id)}
               strategy={verticalListSortingStrategy}
             >
-              <div
-                ref={todoListScrollRef}
-                className="flex flex-col gap-8"
-                
-              >
+              <div ref={todoListScrollRef} className="flex flex-col gap-8">
                 {todoList.length > 0 ? (
                   todoList.map((task, index) => {
                     return (
