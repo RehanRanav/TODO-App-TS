@@ -122,7 +122,7 @@ const HomePage: FC = () => {
         <AddModal />
       </div>
       <div className=" w-1/2 m-auto p-5 max-sm:w-full h-auto ">
-        <div className="h-[290px] overflow-y-auto">
+        <div className="h-[320px] px-4 py-8 overflow-y-auto overflow-x-hidden">
           <DndContext
             onDragEnd={handleDragEnd}
             sensors={sensors}
@@ -154,7 +154,7 @@ const HomePage: FC = () => {
                     <img
                       src={Notask}
                       alt="No Task Found"
-                      className="w-1/3 my-4 rounded"
+                      className="w-1/3 my-2 rounded"
                     />
                     Nothing To do...
                   </div>

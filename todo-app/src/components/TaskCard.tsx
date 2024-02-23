@@ -40,7 +40,7 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
     };
     const intervalID = setInterval(checkRemainingTime, 1000);
     return () => clearInterval(intervalID);
-  }, []);
+  });
 
   useEffect(() => {
     setTaskInput(task);
@@ -86,6 +86,10 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
   const handleEdit = () => {
     setDisableTask(false);
     setisEditing(true);
+    taskInputRef.current?.setSelectionRange(
+      taskInputRef.current.value.length,
+      taskInputRef.current.value.length
+    );
   };
 
   const editTaskInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
