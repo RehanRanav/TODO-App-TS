@@ -176,7 +176,7 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
         completeTask ? "bg-slate-200" : "bg-white"
       } focus:cursor-grabbing mx-auto flex justify-between items-center gap-3 border h-fit w-full   p-3 rounded hover:rounded-tl-none shadow-md font-mono hover:shadow-lg touch-pan-y scroll-smooth relative`}
     >
-      <GrDrag color="#a1a1aa"/>
+      <GrDrag color="#a1a1aa" />
       <div>{index + 1}.</div>
 
       <textarea
@@ -261,26 +261,35 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
         placement="bottom-start"
         animation="duration-1000"
       >
-        <span className="bg-black w-fit h-fit cursor-pointer" onClick={handleStatus}>
+        <span
+          className="bg-black w-fit h-fit cursor-pointer"
+          onClick={handleStatus}
+        >
           <IoCheckmarkDoneCircleSharp
             size={34}
-            color={`${status ? "#22c55e":"#6b7280" }`}
+            color={`${status ? "#22c55e" : "#6b7280"}`}
           />
         </span>
       </Tooltip>
 
       {isHovering ? (
         <div
-          className={`w-fit h-fit p-0.5 absolute -top-[30px] -left-0 rounded-t ${
-            deadlineStatus.includes("ago") ? "bg-red-200" : "bg-yellow-100"
+          className={`w-fit h-fit py-0.5 px-2 absolute -top-[30px] -left-0 rounded-t ${
+            deadlineStatus.includes("ago") && !completeTask
+              ? "bg-red-200"
+              : completeTask
+              ? "bg-green-100"
+              : "bg-yellow-100"
           }`}
         >
-          {deadlineStatus.includes("ago") ? (
+          {completeTask ? (
+            <>Task Completed</>
+          ) : deadlineStatus.includes("ago") ? (
             <>Overdue Time:</>
           ) : (
             <>Remaining Time:</>
           )}
-          {deadlineStatus}
+          {completeTask ? null : deadlineStatus}
         </div>
       ) : null}
     </div>

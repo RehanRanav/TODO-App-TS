@@ -10,16 +10,8 @@ const App: FC = () => {
   const user = useSelector(selectUser);
   const dispatch = useDispatch();
 
-  type TaskObject = {
-    task: string;
-    status: boolean;
-  };
-  type Tasklist = {
-    storedTasks: TaskObject[];
-  };
-
   useEffect(() => {
-    let logedUser: string | null  = localStorage.getItem("user");
+    let logedUser: string | null = localStorage.getItem("user");
     if (logedUser) {
       dispatch(setUser(logedUser));
     }

@@ -8,10 +8,10 @@ const AuthPage: FC = () => {
 
   return (
     <div className="flex flex-col gap-10 justify-center items-center h-screen">
-      <span className="text-gray-300 font-bold font-sans text-4xl">
+      <span className="text-gray-500 font-bold font-sans text-4xl">
         Sign Up
       </span>
-      <div className="w-fit p-5 text-gray-300 bg-slate-900 rounded-full">
+      <div className="w-fit p-5 text-gray-500 bg-white rounded-full">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"

@@ -18,7 +18,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import dayjs from "dayjs";
-import {  HiClock } from "react-icons/hi";
+import { HiClock } from "react-icons/hi";
 import { FaListAlt, FaCheckCircle } from "react-icons/fa";
 import { AiFillCloseCircle } from "react-icons/ai";
 import { jwtDecode } from "jwt-decode";
@@ -39,6 +39,7 @@ const HomePage: FC = () => {
     tasks.filter((task) => task.user === email)
   );
   const todoListScrollRef = useRef<HTMLDivElement | null>(null);
+  const searchRef = useRef<HTMLInputElement | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -56,6 +57,12 @@ const HomePage: FC = () => {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  useEffect(() => {
+    todoList.map(task=>
+      setTimeout
+    )    
+  });
 
   useEffect(() => {
     let taskList = localStorage.getItem("tasklist");
@@ -104,42 +111,111 @@ const HomePage: FC = () => {
     dispatch(setTask(updatedTasks));
   };
 
+  const debounceFunc = (fn: Function, delay: number) => {
+    let timer: NodeJS.Timeout;
+
+    return function () {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        fn();
+      }, delay);
+    };
+  };
+
+  const filterdata = () => {
+    setTodoList(tasks.filter((task) => task.user === email));
+    let input = searchRef.current?.value?.trim()?.toUpperCase() || "";
+    if (input) {
+      const updatedTodoList = todoList.filter((todo) =>
+        todo.task.toUpperCase().includes(input)
+      );
+      setTodoList(updatedTodoList);
+    }
+  };
+
+  const searchTask = debounceFunc(filterdata, 800);
+
   return (
     <div className="w-full text-center h-full">
       <Header />
 
-      <div className="font-mono w-4/5 grid grid-cols-4 gap-4 p-2 m-auto mt-1">
-        <div className="bg-white p-2 rounded flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out">
-          <FaListAlt color="#38bdf8" size={24}/>
+      <div className="font-mono lg:w-4/5 sm:w-full grid grid-cols-4 gap-4 p-2 m-auto mt-1 overflow-hidden ">
+        <div className="bg-white p-2 rounded flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
+          <FaListAlt color="#38bdf8" size={24} />
           <span className="text-2xl font-bold">{todoList.length}</span>
-          <span className="flex items-center">
-            Total Tasks</span>
+          <span className="flex items-center">Total Tasks</span>
         </div>
-        <div className="bg-white py-4 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out">
-          <HiClock color="#fde047" size={24}/>
-          <span className="text-2xl font-bold"> {todoList.filter((task) => task.status == false).length}</span>
-          <span className="flex items-center">
-          Pending Tasks</span>
+        <div className="bg-white py-4 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
+          <HiClock color="#fde047" size={24} />
+          <span className="text-2xl font-bold">
+            {" "}
+            {
+              todoList.filter(
+                (todo) =>
+                  dayjs().isBefore(todo.deadline) && todo.status == false
+              ).length
+            }
+          </span>
+          <span className="flex items-center">Pending Tasks</span>
         </div>
-        <div className="bg-white p-2 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out">
-          <FaCheckCircle color="#86efac" size={24}/>
-          <span className="text-2xl font-bold"> {todoList.filter((task) => task.status == true).length}</span>
-          <span className="flex items-center">
-          Completed Tasks</span>
+        <div className="bg-white p-2 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
+          <FaCheckCircle color="#86efac" size={24} />
+          <span className="text-2xl font-bold">
+            {" "}
+            {todoList.filter((todo) => todo.status == true).length}
+          </span>
+          <span className="flex items-center">Completed Tasks</span>
         </div>
-        <div className="bg-white p-2 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out">
-          <AiFillCloseCircle color="#fca5a5" size={24}/>
-          <span className="text-2xl font-bold"> {todoList.filter((todo) => dayjs().isAfter(todo.deadline)).length}</span>
-          <span className="flex items-center">
-          OverDue Tasks</span>
+        <div className="bg-white p-2 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
+          <AiFillCloseCircle color="#fca5a5" size={24} />
+          <span className="text-2xl font-bold">
+            {" "}
+            {
+              todoList.filter(
+                (todo) =>
+                  dayjs().isAfter(todo.deadline) && todo.status === false
+              ).length
+            }
+          </span>
+          <span className="flex items-center">OverDue Tasks</span>
         </div>
       </div>
 
-      <div className="flex justify-center mt-10">
-        <AddModal />
+      <div className="flex justify-centermt-8 mt-6">
+        <div className="w-1/2 px-8 py-2 m-auto max-md:w-full h-auto flex justify-between max-sm:justify-center ">
+          <div className="relative w-fit max-sm:hidden">
+            <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+              <svg
+                className="w-4 h-4 text-gray-500 dark:text-gray-400"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                />
+              </svg>
+            </div>
+            <input
+              ref={searchRef}
+              type="search"
+              id="default-search"
+              className="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Search ToDos"
+              onChange={searchTask}
+            />
+          </div>
+
+          <AddModal />
+        </div>
       </div>
       <div className=" w-1/2 m-auto p-5 max-sm:w-full h-auto ">
-        <div className="h-[340px] px-4 py-8 overflow-y-auto overflow-x-hidden">
+        <div className="h-[220px] px-4 py-8 overflow-y-auto overflow-x-hidden">
           <DndContext
             onDragEnd={handleDragEnd}
             sensors={sensors}
@@ -163,7 +239,7 @@ const HomePage: FC = () => {
                     );
                   })
                 ) : (
-                  <div className="flex flex-col justify-center items-center font-mono text-lg font-bold text-[#EEEEEE]">
+                  <div className="flex flex-col justify-center items-center font-mono text-lg font-bold text-gray-500">
                     <img
                       src={Notask}
                       alt="No Task Found"
