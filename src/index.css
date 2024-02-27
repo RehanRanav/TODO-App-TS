@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+iframe#webpack-dev-server-client-overlay{display:none!important}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.custom-ckeckbox-check:checked {
+  background-image: url(images/checkbox.ico);
+  background-repeat: no-repeat;
+  background-size: 100%;
+  border: none;
+}

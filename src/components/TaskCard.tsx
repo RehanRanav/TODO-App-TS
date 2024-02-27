@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Modal, Button, Tooltip } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { IoCheckmarkDoneCircleSharp } from "react-icons/io5";
+import { GrDrag } from "react-icons/gr";
 import { useSelector, useDispatch } from "react-redux";
 import dayjs from "dayjs";
 import { formatDistanceToNow } from "date-fns";
@@ -21,11 +23,36 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
   const [isHovering, setIsHovering] = useState(false);
   const [deadlineStatus, setDeadlineStatus] = useState("");
   const taskInputRef = useRef<HTMLTextAreaElement | null>(null);
-  const checkRef = useRef<HTMLInputElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id, disabled: isEditing });
+
+  useEffect(() => {
+    if (status === "pending") {
+      const i = getTaskPos(id);
+      if (tasks[i]) {
+        const deadlineTime = dayjs(tasks[i]?.deadline);
+        const currentTime = dayjs();
+
+        const timeoutDuration = Math.max(0, deadlineTime.diff(currentTime));
+
+        const timeoutId = setTimeout(() => {
+          if (dayjs().isAfter(tasks[i].deadline)) {
+            let updatedTasks = [...tasks];
+            updatedTasks[i] = { ...updatedTasks[i] };
+
+            updatedTasks[i].status = `overdue`;
+
+            dispatch(setTask(updatedTasks));
+            setCompleteTask(updatedTasks[i].status);
+          }
+        }, timeoutDuration);
+
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, [id, tasks, status]);
 
   useEffect(() => {
     const checkRemainingTime = () => {
@@ -40,7 +67,7 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
     };
     const intervalID = setInterval(checkRemainingTime, 1000);
     return () => clearInterval(intervalID);
-  }, []);
+  }, [id, task]);
 
   useEffect(() => {
     setTaskInput(task);
@@ -52,16 +79,6 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
       taskInputRef.current.focus();
     }
   }, [disableTask]);
-
-  useEffect(() => {
-    if (checkRef.current) {
-      if (status === true) {
-        checkRef.current.checked = true;
-      } else {
-        checkRef.current.checked = false;
-      }
-    }
-  }, [task]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -86,6 +103,10 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
   const handleEdit = () => {
     setDisableTask(false);
     setisEditing(true);
+    taskInputRef.current?.setSelectionRange(
+      taskInputRef.current.value.length,
+      taskInputRef.current.value.length
+    );
   };
 
   const editTaskInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -144,14 +165,25 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
     const i = getTaskPos(id);
     updatedTasks[i] = { ...updatedTasks[i] };
 
-    updatedTasks[i].status = !completeTask;
+    updatedTasks[i].status =
+      completeTask === `pending`
+        ? `completed`
+        : completeTask === `completed` &&
+          dayjs().isBefore(updatedTasks[i].deadline)
+        ? `pending`
+        : completeTask === `completed` &&
+          dayjs().isAfter(updatedTasks[i].deadline)
+        ? `overdue`
+        : completeTask === `late submitted`
+        ? `overdue`
+        : `late submitted`;
 
     dispatch(setTask(updatedTasks));
-    if (!completeTask) {
-      toast.info("👏 Good Job! Task Completed...");
+    if (updatedTasks[i].status === "complete") {
+      toast.success("👏 Good Job! Task Completed...");
     }
     setTaskInput(task);
-    setCompleteTask(!completeTask);
+    setCompleteTask(updatedTasks[i].status);
     setDisableTask(true);
   };
 
@@ -178,28 +210,28 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
       onMouseLeave={() => setIsHovering(false)}
       style={dndStyle}
       className={`${
-        completeTask ? "bg-slate-300" : "bg-[#EEEEEE]"
+        completeTask === `completed` || completeTask === `late submitted`
+          ? "bg-slate-200 dark:bg-slate-300"
+          : "bg-white dark:bg-sky-200"
       } focus:cursor-grabbing mx-auto flex justify-between items-center gap-3 border h-fit w-full   p-3 rounded hover:rounded-tl-none shadow-md font-mono hover:shadow-lg touch-pan-y scroll-smooth relative`}
     >
+      <GrDrag color="#a1a1aa" />
       <div>{index + 1}.</div>
-      <Tooltip content="Check to mark as complete" placement="left">
-        <input
-          id="yellow-checkbox"
-          type="checkbox"
-          className="p-1 min-w-5 min-h-5 rounded-full text-green-400 bg-gray-300 border-gray-300 cursor-pointer"
-          onChange={handleStatus}
-          ref={checkRef}
-        />
-      </Tooltip>
 
       <textarea
         ref={taskInputRef}
         id="todotask"
-        className={`p-[4px] h-fit bg-inherit text-lg resize-none flex-1 border-none text-gray-900 font-bold rounded block w-fit p-2.5${
-          completeTask ? "line-through opacity-50" : ""
+        className={`p-[4px] h-fit bg-inherit text-lg resize-none flex-1 border-none text-gray-900 font-bold rounded block w-fit ${
+          completeTask === `completed` || completeTask === `late submitted`
+            ? "line-through opacity-50"
+            : ""
         }`}
         style={{
-          textDecoration: `${completeTask ? "line-through" : "none"}`,
+          textDecoration: `${
+            completeTask === `completed` || completeTask === `late submitted`
+              ? "line-through"
+              : "none"
+          }`,
         }}
         value={taskInput}
         rows={1}
@@ -215,7 +247,7 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
           <Button
             title="Delete Task"
             onClick={() => setOpenModal(true)}
-            className="bg-[#00ADB5]"
+            className="bg-[#4da0e6] hover:bg-[#38a0f6]"
           >
             Delete
           </Button>
@@ -245,7 +277,7 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
           </Modal>
         </>
       ) : (
-        <Button onClick={addEditedTask} className="bg-[#00ADB5]">
+        <Button onClick={addEditedTask} className="bg-[#4da0e6]">
           Add
         </Button>
       )}
@@ -254,8 +286,12 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
         <Button
           onClick={handleEdit}
           title="Edit Task"
-          disabled={completeTask}
-          className="bg-[#00ADB5]"
+          disabled={
+            completeTask === `completed` || completeTask === `late submitted`
+              ? true
+              : false
+          }
+          className="bg-[#4da0e6]"
         >
           Edit
         </Button>
@@ -263,24 +299,58 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
         <Button
           onClick={handleCancel}
           title="Cancel Edit Task"
-          className="bg-[#00ADB5]"
+          className="bg-[#4da0e6]"
         >
           Cancel
         </Button>
       )}
 
+      <Tooltip
+        content="Mark as complete"
+        placement="bottom-start"
+        animation="duration-1000"
+      >
+        <span
+          className="bg-black w-fit h-fit cursor-pointer"
+          onClick={handleStatus}
+        >
+          <IoCheckmarkDoneCircleSharp
+            size={34}
+            color={`${
+              completeTask === `completed` || completeTask === `late submitted`
+                ? "#22c55e"
+                : "#6b7280"
+            }`}
+          />
+        </span>
+      </Tooltip>
+
       {isHovering ? (
         <div
-          className={`w-fit h-fit p-0.5 absolute -top-7 -left-0 rounded-t ${
-            deadlineStatus.includes("ago") ? "bg-red-200" : "bg-yellow-100"
+          className={`w-fit h-fit py-0.5 px-2 absolute -top-[30px] -left-0 rounded-t ${
+            deadlineStatus.includes("ago") &&
+            (completeTask === `pending` || completeTask === `overdue`)
+              ? "bg-red-200"
+              : completeTask === `completed` ||
+                completeTask === `late submitted`
+              ? "bg-green-100"
+              : "bg-yellow-100"
           }`}
         >
-          {deadlineStatus.includes("ago") ? (
+          {completeTask === `completed` || completeTask === `late submitted` ? (
+            completeTask === `completed` ? (
+              <>Task Completed</>
+            ) : (
+              <>late submitted</>
+            )
+          ) : deadlineStatus.includes("ago") ? (
             <>Overdue Time:</>
           ) : (
             <>Remaining Time:</>
           )}
-          {deadlineStatus}
+          {completeTask === `completed` || completeTask === `late submitted`
+            ? null
+            : deadlineStatus}
         </div>
       ) : null}
     </div>

@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface UserState {
-  userData: Record<string, any> | null; // Adjust the data type as per your requirement
+  userData: string | null; // Adjust the data type as per your requirement
 }
 
 const initialState: UserState = {
@@ -12,9 +12,9 @@ const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    setUser: (state, action: PayloadAction<Record<string, any>>) => {
+    setUser: (state, action: PayloadAction<string>) => {
       state.userData = action.payload;
-      localStorage.setItem("user", JSON.stringify(state.userData));
+      localStorage.setItem("user", state.userData);
     },
     clearUser: (state) => {
       state.userData = null;

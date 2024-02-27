@@ -5,13 +5,13 @@ export interface TaskCardProps {
   id: UniqueIdentifier;
   task: string;
   index: number;
-  status: boolean;
+  status: string;
 }
 
 export interface TaskObject {
   id: UniqueIdentifier;
   task: string;
-  status: boolean;
+  status: string;
   user: string;
   deadline: dayjs.Dayjs;
 }
