@@ -211,8 +211,8 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
       style={dndStyle}
       className={`${
         completeTask === `completed` || completeTask === `late submitted`
-          ? "bg-slate-200"
-          : "bg-white"
+          ? "bg-slate-200 dark:bg-slate-300"
+          : "bg-white dark:bg-sky-200"
       } focus:cursor-grabbing mx-auto flex justify-between items-center gap-3 border h-fit w-full   p-3 rounded hover:rounded-tl-none shadow-md font-mono hover:shadow-lg touch-pan-y scroll-smooth relative`}
     >
       <GrDrag color="#a1a1aa" />

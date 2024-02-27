@@ -135,37 +135,37 @@ const HomePage: FC = () => {
       <Header />
 
       <div className="font-mono lg:w-4/5 sm:w-full grid grid-cols-5 gap-4 p-2 m-auto mt-1 overflow-hidden ">
-        <div className="bg-white p-2 rounded flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
-          <FaListAlt color="#38bdf8" size={24} />
+        <div className="bg-white dark:bg-sky-100 p-2 rounded flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
+          <FaListAlt size={24} className="text-sky-400"/>
           <span className="text-2xl font-bold">{todoList.length}</span>
           <span className="flex items-center">Total Tasks</span>
         </div>
-        <div className="bg-white py-4 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
-          <HiClock color="#fde047" size={24} />
+        <div className="bg-white dark:bg-sky-100 py-4 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
+          <HiClock size={24} className="text-amber-400"/>
           <span className="text-2xl font-bold">
             {" "}
             {todoList.filter((todo) => todo.status === `pending`).length}
           </span>
           <span className="flex items-center">Pending Tasks</span>
         </div>
-        <div className="bg-white p-2 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
-          <FaCheckCircle color="#86efac" size={24} />
+        <div className="bg-white dark:bg-sky-100 p-2 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
+          <FaCheckCircle size={24} className="text-green-400" />
           <span className="text-2xl font-bold">
             {" "}
             {todoList.filter((todo) => todo.status === `completed`).length}
           </span>
           <span className="flex items-center">Completed Tasks</span>
         </div>
-        <div className="bg-white p-2 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
-          <AiFillCloseCircle color="#fca5a5" size={24} />
+        <div className="bg-white dark:bg-sky-100 p-2 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
+          <AiFillCloseCircle size={24} className="text-red-400"/>
           <span className="text-2xl font-bold">
             {" "}
             {todoList.filter((todo) => todo.status === `overdue`).length}
           </span>
           <span className="flex items-center">OverDue Tasks</span>
         </div>
-        <div className="bg-white p-2 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
-          <FaCheckCircle color="#fca5a5" size={24} />
+        <div className="bg-white dark:bg-sky-100 p-2 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
+          <FaCheckCircle size={24} className="text-red-400"/>
           <span className="text-2xl font-bold">
             {" "}
             {todoList.filter((todo) => todo.status === `late submitted`).length}
@@ -198,7 +198,7 @@ const HomePage: FC = () => {
               ref={searchRef}
               type="search"
               id="default-search"
-              className="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-500 dark:border-gray-600 dark:placeholder-gray-200 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Search ToDos"
               onChange={searchTask}
             />
@@ -208,7 +208,7 @@ const HomePage: FC = () => {
         </div>
       </div>
       <div className=" w-1/2 m-auto p-5 max-sm:w-full h-auto ">
-        <div className="h-[220px] px-4 py-8 overflow-y-auto overflow-x-hidden">
+        <div className="h-[230px] px-4 py-8 overflow-y-auto overflow-x-hidden">
           <DndContext
             onDragEnd={handleDragEnd}
             sensors={sensors}
