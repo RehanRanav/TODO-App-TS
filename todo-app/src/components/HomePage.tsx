@@ -59,12 +59,6 @@ const HomePage: FC = () => {
   );
 
   useEffect(() => {
-    todoList.map(task=>
-      setTimeout
-    )    
-  });
-
-  useEffect(() => {
     let taskList = localStorage.getItem("tasklist");
     if (taskList) {
       const taskLists: TaskObject[] = JSON.parse(taskList);
@@ -123,13 +117,14 @@ const HomePage: FC = () => {
   };
 
   const filterdata = () => {
-    setTodoList(tasks.filter((task) => task.user === email));
     let input = searchRef.current?.value?.trim()?.toUpperCase() || "";
     if (input) {
-      const updatedTodoList = todoList.filter((todo) =>
-        todo.task.toUpperCase().includes(input)
+      const updatedTodoList = tasks.filter(
+        (task) => task.user === email && task.task.toUpperCase().includes(input)
       );
       setTodoList(updatedTodoList);
+    } else {
+      setTodoList(tasks.filter((task) => task.user === email));
     }
   };
 
@@ -139,7 +134,7 @@ const HomePage: FC = () => {
     <div className="w-full text-center h-full">
       <Header />
 
-      <div className="font-mono lg:w-4/5 sm:w-full grid grid-cols-4 gap-4 p-2 m-auto mt-1 overflow-hidden ">
+      <div className="font-mono lg:w-4/5 sm:w-full grid grid-cols-5 gap-4 p-2 m-auto mt-1 overflow-hidden ">
         <div className="bg-white p-2 rounded flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
           <FaListAlt color="#38bdf8" size={24} />
           <span className="text-2xl font-bold">{todoList.length}</span>
@@ -149,12 +144,7 @@ const HomePage: FC = () => {
           <HiClock color="#fde047" size={24} />
           <span className="text-2xl font-bold">
             {" "}
-            {
-              todoList.filter(
-                (todo) =>
-                  dayjs().isBefore(todo.deadline) && todo.status == false
-              ).length
-            }
+            {todoList.filter((todo) => todo.status === `pending`).length}
           </span>
           <span className="flex items-center">Pending Tasks</span>
         </div>
@@ -162,7 +152,7 @@ const HomePage: FC = () => {
           <FaCheckCircle color="#86efac" size={24} />
           <span className="text-2xl font-bold">
             {" "}
-            {todoList.filter((todo) => todo.status == true).length}
+            {todoList.filter((todo) => todo.status === `completed`).length}
           </span>
           <span className="flex items-center">Completed Tasks</span>
         </div>
@@ -170,14 +160,17 @@ const HomePage: FC = () => {
           <AiFillCloseCircle color="#fca5a5" size={24} />
           <span className="text-2xl font-bold">
             {" "}
-            {
-              todoList.filter(
-                (todo) =>
-                  dayjs().isAfter(todo.deadline) && todo.status === false
-              ).length
-            }
+            {todoList.filter((todo) => todo.status === `overdue`).length}
           </span>
           <span className="flex items-center">OverDue Tasks</span>
+        </div>
+        <div className="bg-white p-2 rounded-sm flex flex-col justify-center items-center shadow-md cursor-pointer hover:scale-105 transition-all duration-300 ease-in-out overflow-hidden">
+          <FaCheckCircle color="#fca5a5" size={24} />
+          <span className="text-2xl font-bold">
+            {" "}
+            {todoList.filter((todo) => todo.status === `late submitted`).length}
+          </span>
+          <span className="flex items-center">Late Submitted Tasks</span>
         </div>
       </div>
 

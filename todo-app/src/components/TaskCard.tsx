@@ -29,6 +29,32 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
     useSortable({ id, disabled: isEditing });
 
   useEffect(() => {
+    if (status === "pending") {
+      const i = getTaskPos(id);
+      if (tasks[i]) {
+        const deadlineTime = dayjs(tasks[i]?.deadline);
+        const currentTime = dayjs();
+
+        const timeoutDuration = Math.max(0, deadlineTime.diff(currentTime));
+
+        const timeoutId = setTimeout(() => {
+          if (dayjs().isAfter(tasks[i].deadline)) {
+            let updatedTasks = [...tasks];
+            updatedTasks[i] = { ...updatedTasks[i] };
+
+            updatedTasks[i].status = `overdue`;
+
+            dispatch(setTask(updatedTasks));
+            setCompleteTask(updatedTasks[i].status);
+          }
+        }, timeoutDuration);
+
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, [id, tasks, status]);
+
+  useEffect(() => {
     const checkRemainingTime = () => {
       const taskDeadlineTime = dayjs(
         tasks[getTaskPos(id)].deadline,
@@ -139,14 +165,25 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
     const i = getTaskPos(id);
     updatedTasks[i] = { ...updatedTasks[i] };
 
-    updatedTasks[i].status = !completeTask;
+    updatedTasks[i].status =
+      completeTask === `pending`
+        ? `completed`
+        : completeTask === `completed` &&
+          dayjs().isBefore(updatedTasks[i].deadline)
+        ? `pending`
+        : completeTask === `completed` &&
+          dayjs().isAfter(updatedTasks[i].deadline)
+        ? `overdue`
+        : completeTask === `late submitted`
+        ? `overdue`
+        : `late submitted`;
 
     dispatch(setTask(updatedTasks));
-    if (!completeTask) {
+    if (updatedTasks[i].status === "complete") {
       toast.success("👏 Good Job! Task Completed...");
     }
     setTaskInput(task);
-    setCompleteTask(!completeTask);
+    setCompleteTask(updatedTasks[i].status);
     setDisableTask(true);
   };
 
@@ -173,7 +210,9 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
       onMouseLeave={() => setIsHovering(false)}
       style={dndStyle}
       className={`${
-        completeTask ? "bg-slate-200" : "bg-white"
+        completeTask === `completed` || completeTask === `late submitted`
+          ? "bg-slate-200"
+          : "bg-white"
       } focus:cursor-grabbing mx-auto flex justify-between items-center gap-3 border h-fit w-full   p-3 rounded hover:rounded-tl-none shadow-md font-mono hover:shadow-lg touch-pan-y scroll-smooth relative`}
     >
       <GrDrag color="#a1a1aa" />
@@ -183,10 +222,16 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
         ref={taskInputRef}
         id="todotask"
         className={`p-[4px] h-fit bg-inherit text-lg resize-none flex-1 border-none text-gray-900 font-bold rounded block w-fit ${
-          completeTask ? "line-through opacity-50" : ""
+          completeTask === `completed` || completeTask === `late submitted`
+            ? "line-through opacity-50"
+            : ""
         }`}
         style={{
-          textDecoration: `${completeTask ? "line-through" : "none"}`,
+          textDecoration: `${
+            completeTask === `completed` || completeTask === `late submitted`
+              ? "line-through"
+              : "none"
+          }`,
         }}
         value={taskInput}
         rows={1}
@@ -241,7 +286,11 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
         <Button
           onClick={handleEdit}
           title="Edit Task"
-          disabled={completeTask}
+          disabled={
+            completeTask === `completed` || completeTask === `late submitted`
+              ? true
+              : false
+          }
           className="bg-[#4da0e6]"
         >
           Edit
@@ -267,7 +316,11 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
         >
           <IoCheckmarkDoneCircleSharp
             size={34}
-            color={`${status ? "#22c55e" : "#6b7280"}`}
+            color={`${
+              completeTask === `completed` || completeTask === `late submitted`
+                ? "#22c55e"
+                : "#6b7280"
+            }`}
           />
         </span>
       </Tooltip>
@@ -275,21 +328,29 @@ const TaskCard = ({ task, index, status, id }: TaskCardProps) => {
       {isHovering ? (
         <div
           className={`w-fit h-fit py-0.5 px-2 absolute -top-[30px] -left-0 rounded-t ${
-            deadlineStatus.includes("ago") && !completeTask
+            deadlineStatus.includes("ago") &&
+            (completeTask === `pending` || completeTask === `overdue`)
               ? "bg-red-200"
-              : completeTask
+              : completeTask === `completed` ||
+                completeTask === `late submitted`
               ? "bg-green-100"
               : "bg-yellow-100"
           }`}
         >
-          {completeTask ? (
-            <>Task Completed</>
+          {completeTask === `completed` || completeTask === `late submitted` ? (
+            completeTask === `completed` ? (
+              <>Task Completed</>
+            ) : (
+              <>late submitted</>
+            )
           ) : deadlineStatus.includes("ago") ? (
             <>Overdue Time:</>
           ) : (
             <>Remaining Time:</>
           )}
-          {completeTask ? null : deadlineStatus}
+          {completeTask === `completed` || completeTask === `late submitted`
+            ? null
+            : deadlineStatus}
         </div>
       ) : null}
     </div>

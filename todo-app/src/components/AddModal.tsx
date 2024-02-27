@@ -47,7 +47,7 @@ function AddModal() {
             addToLocalStorage({
               id: generateRandomNumber(),
               task: inputTask,
-              status: false,
+              status: `pending`,
               user: email,
               deadline: taskDeadline.format("MM/DD/YYYY hh:mm A"),
             })
