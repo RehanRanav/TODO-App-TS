@@ -1,5 +1,7 @@
 # React TypeScript To-Do App with Google Authentication
 
+Demo: https://coruscating-snickerdoodle-f819c3.netlify.app/
+
 ## Overview
 
 Welcome to the React TypeScript To-Do App! This project is a simple and efficient task management application built with React.js, TypeScript, and Tailwind CSS. It includes essential features such as task creation, editing, deletion, marking tasks as completed, setting task deadlines, and providing insightful task information.The application also offers an intuitive Drag and Drop functionality for easy task organization. Additionally, the app integrates Google Authentication to enhance user experience and security. Users can also enjoy a personalized experience with the option to switch between Dark and Light modes.
